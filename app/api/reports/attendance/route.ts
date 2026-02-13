@@ -60,20 +60,20 @@ export async function GET(request: NextRequest) {
         const currentDate = new Date(startDate + 'T00:00:00Z')
         
         while (currentDate <= endDate) {
-          const dayOfWeek = currentDate.getUTCDay() // 0 = dimanche, 6 = samedi
-          
+          // Mapping JS: 0=dimanche, 1=lundi, ..., 6=samedi
+          // Mapping affichage: 0=lundi, ..., 5=samedi, 6=dimanche
+          const displayDayIndex = currentDate.getUTCDay() === 0 ? 6 : currentDate.getUTCDay() - 1;
           if (schedules && schedules.length > 0) {
-            const daySchedule = schedules.find(s => s.day_of_week === dayOfWeek)
+            const daySchedule = schedules.find(s => s.day_of_week === displayDayIndex)
             if (daySchedule?.is_working_day) {
               totalWorkDays++
             }
           } else {
             // Par défaut lundi-vendredi
-            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+            if (displayDayIndex >= 0 && displayDayIndex <= 4) {
               totalWorkDays++
             }
           }
-          
           currentDate.setUTCDate(currentDate.getUTCDate() + 1)
         }
 
@@ -107,22 +107,19 @@ export async function GET(request: NextRequest) {
         leaves?.forEach(leave => {
           const leaveStart = new Date(Math.max(new Date(leave.start_date).getTime(), startDate.getTime()))
           const leaveEnd = new Date(Math.min(new Date(leave.end_date).getTime(), endDate.getTime()))
-          
           const leaveDate = new Date(leaveStart)
           while (leaveDate <= leaveEnd) {
-            const dayOfWeek = leaveDate.getUTCDay() // 0 = dimanche, 6 = samedi
-            
+            const displayDayIndex = leaveDate.getUTCDay() === 0 ? 6 : leaveDate.getUTCDay() - 1;
             if (schedules && schedules.length > 0) {
-              const daySchedule = schedules.find(s => s.day_of_week === dayOfWeek)
+              const daySchedule = schedules.find(s => s.day_of_week === displayDayIndex)
               if (daySchedule?.is_working_day) {
                 leaveDays++
               }
             } else {
-              if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+              if (displayDayIndex >= 0 && displayDayIndex <= 4) {
                 leaveDays++
               }
             }
-            
             leaveDate.setUTCDate(leaveDate.getUTCDate() + 1)
           }
         })
