@@ -171,9 +171,9 @@ export default function StoreDisplay() {
           <div className="min-w-[800px]">
             {/* Jours de la semaine */}
             <div className="grid grid-cols-7 gap-2 mb-4">
-              {weekDays.map((day) => (
+              {weekDays.map((day, i) => (
                 <div key={day} className="text-center font-bold text-xl md:text-2xl text-primary py-3 bg-primary/10 rounded-xl">
-                  {day}
+                  {weekDays[i]}
                 </div>
               ))}
             </div>

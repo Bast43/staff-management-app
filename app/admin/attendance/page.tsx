@@ -204,12 +204,16 @@ export default function AdminAttendance() {
                 Employé
               </th>
               <th className="text-left py-3 px-2 font-semibold">Prochain congé</th>
-              {weekDates.map((date, i) => (
-                <th key={i} className="text-center py-3 px-2 font-semibold">
-                  <div>{weekDays[i]}</div>
-                  <div className="text-xs font-normal">{date.getDate()}/{date.getMonth() + 1}</div>
-                </th>
-              ))}
+              {weekDates.map((date, i) => {
+                // Affichage lundi-dimanche
+                const displayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
+                return (
+                  <th key={i} className="text-center py-3 px-2 font-semibold">
+                    <div>{weekDays[displayIndex]}</div>
+                    <div className="text-xs font-normal">{date.getDate()}/{date.getMonth() + 1}</div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>

@@ -196,9 +196,9 @@ export default function AdminDashboard() {
           <div className="min-w-[800px]">
             {/* En-têtes jours de la semaine */}
             <div className="grid grid-cols-7 gap-1 mb-2">
-              {weekDays.map((day) => (
+              {weekDays.map((day, i) => (
                 <div key={day} className="text-center font-semibold py-2 text-sm">
-                  {day}
+                  {weekDays[i]}
                 </div>
               ))}
             </div>

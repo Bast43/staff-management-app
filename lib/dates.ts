@@ -39,6 +39,11 @@ export function getWeekDays(): string[] {
   return ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 }
 
+// Convertit getDay() JS (0=dimanche) en index d'affichage (0=lundi, 6=dimanche)
+export function getDisplayDayIndex(jsDay: number): number {
+  return jsDay === 0 ? 6 : jsDay - 1;
+}
+
 export function getStartOfWeek(date: Date): Date {
   const day = date.getDay()
   const diff = date.getDate() - day + (day === 0 ? -6 : 1)
