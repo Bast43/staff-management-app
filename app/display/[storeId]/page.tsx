@@ -81,16 +81,15 @@ export default function StoreDisplay() {
     const firstDay = new Date(year, month, 1)
     const lastDay = new Date(year, month + 1, 0)
     const daysInMonth = lastDay.getDate()
-    const startDayOfWeek = firstDay.getDay()
+    const startDayOfWeek = firstDay.getUTCDay()
 
     const days: (Date | null)[] = []
-    // Correction : lundi = 1, donc (startDayOfWeek + 6) % 7
     const emptyDays = (startDayOfWeek + 6) % 7
     for (let i = 0; i < emptyDays; i++) {
       days.push(null)
     }
     for (let day = 1; day <= daysInMonth; day++) {
-      days.push(new Date(year, month, day))
+      days.push(new Date(Date.UTC(year, month, day)))
     }
     return days
   }
