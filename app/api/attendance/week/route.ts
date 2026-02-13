@@ -22,12 +22,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Date requise' }, { status: 400 })
     }
 
-    // Générer les 7 jours de la semaine
-    const monday = new Date(date)
+    // Générer les 7 jours de la semaine (lundi à dimanche, UTC)
+    const monday = new Date(date + 'T00:00:00Z')
     const weekDates: string[] = []
     for (let i = 0; i < 7; i++) {
       const d = new Date(monday)
-      d.setDate(monday.getDate() + i)
+      d.setUTCDate(monday.getUTCDate() + i)
       weekDates.push(d.toISOString().split('T')[0])
     }
 
