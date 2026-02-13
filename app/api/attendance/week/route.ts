@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     // Générer les 7 jours de la semaine
     const monday = new Date(date)
-    const weekDates = []
+    const weekDates: string[] = []
     for (let i = 0; i < 7; i++) {
       const d = new Date(monday)
       d.setDate(monday.getDate() + i)
@@ -125,7 +125,13 @@ export async function GET(request: NextRequest) {
           name: emp.name,
           position: emp.position,
           store_id: emp.store_id,
-          store_name: emp.store?.name || 'N/A',
+          store_name: (() => {
+            const store: any = emp.store;
+            if (Array.isArray(store)) {
+              return store.length > 0 && store[0]?.name ? store[0].name : 'N/A';
+            }
+            return store && store.name ? store.name : 'N/A';
+          })(),
         },
         days,
         nextLeave: nextLeaveInfo,
