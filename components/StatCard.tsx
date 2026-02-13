@@ -1,6 +1,6 @@
 type StatCardProps = {
   icon: string
-  iconColor: 'blue' | 'green' | 'orange' | 'yellow'
+  iconColor: 'blue' | 'green' | 'orange' | 'yellow' | 'purple'
   value: string | number
   label: string
   onClick?: () => void
@@ -12,6 +12,7 @@ export default function StatCard({ icon, iconColor, value, label, onClick }: Sta
     green: 'bg-success/10 text-success',
     orange: 'bg-accent/10 text-accent',
     yellow: 'bg-warning/10 text-warning',
+    purple: 'bg-purple-100 text-purple-600', // Ajout purple, adapte les classes Tailwind si besoin
   }
 
   return (
