@@ -106,9 +106,7 @@ export async function GET(request: NextRequest) {
 
     while (currentDate <= lastDay) {
       const dateStr = currentDate.toISOString().split('T')[0]
-      // Mapping JS: 0=dimanche, 1=lundi, ..., 6=samedi
-      // Mapping affichage: 0=lundi, ..., 5=samedi, 6=dimanche
-      const displayDayIndex = currentDate.getUTCDay() === 0 ? 6 : currentDate.getUTCDay() - 1;
+      const jsDayOfWeek = currentDate.getUTCDay(); // 0=dimanche, 1=lundi, ..., 6=samedi
 
       const dayEmployees = employeesWithColors.map(emp => {
         // Vérifier si en congé
@@ -125,20 +123,20 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        // Vérifier la grille horaire
+        // Vérifier la grille horaire (stockée en JS: 0=dimanche, 1=lundi, ...)
         const userSchedule = scheduleMap.get(emp.id)
         if (userSchedule && userSchedule.length > 0) {
-          const daySchedule = userSchedule.find(s => s.day_of_week === displayDayIndex)
+          const daySchedule = userSchedule.find(s => s.day_of_week === jsDayOfWeek)
           return {
             ...emp,
             isWorking: daySchedule?.is_working_day || false,
           }
         }
 
-        // Par défaut : lundi-vendredi (displayDayIndex 0-4)
+        // Par défaut : lundi-vendredi (jsDayOfWeek 1-5)
         return {
           ...emp,
-          isWorking: displayDayIndex >= 0 && displayDayIndex <= 4,
+          isWorking: jsDayOfWeek >= 1 && jsDayOfWeek <= 5,
         }
       })
 
