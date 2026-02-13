@@ -20,7 +20,7 @@ export default function EmployeeSchedule() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+  const dayNames = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
 
   useEffect(() => {
     loadData()
@@ -106,53 +106,61 @@ export default function EmployeeSchedule() {
         <h2 className="text-2xl font-bold mb-6">Configuration hebdomadaire</h2>
         
         <div className="space-y-4">
-          {schedule.map((day) => (
-            <div
-              key={day.day_of_week}
-              className="p-4 bg-bg-main rounded-xl"
-            >
-              <div className="flex items-center gap-4 flex-wrap">
-                {/* Jour */}
-                <div className="w-32">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={day.is_working_day}
-                      onChange={() => handleToggleDay(day.day_of_week)}
-                      className="w-5 h-5 rounded border-2 border-border checked:bg-primary checked:border-primary"
-                    />
-                    <span className="font-semibold">{dayNames[day.day_of_week]}</span>
-                  </label>
-                </div>
-
-                {/* Horaires */}
-                {day.is_working_day ? (
-                  <div className="flex items-center gap-4 flex-1">
-                    <div>
-                      <label className="block text-sm text-text-light mb-1">Début</label>
-                      <input
-                        type="time"
-                        className="input"
-                        value={day.start_time || '09:00'}
-                        onChange={(e) => handleTimeChange(day.day_of_week, 'start_time', e.target.value)}
-                      />
+          {schedule
+            .slice()
+            .sort((a, b) => {
+              // Place lundi (1) en premier, dimanche (0) en dernier
+              const orderA = a.day_of_week === 0 ? 7 : a.day_of_week;
+              const orderB = b.day_of_week === 0 ? 7 : b.day_of_week;
+              return orderA - orderB;
+            })
+            .map((day) => {
+              // Pour l'affichage, lundi=1, dimanche=0
+              const displayIndex = day.day_of_week === 0 ? 6 : day.day_of_week - 1;
+              return (
+                <div key={day.day_of_week} className="p-4 bg-bg-main rounded-xl">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    {/* Jour */}
+                    <div className="w-32">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={day.is_working_day}
+                          onChange={() => handleToggleDay(day.day_of_week)}
+                          className="w-5 h-5 rounded border-2 border-border checked:bg-primary checked:border-primary"
+                        />
+                        <span className="font-semibold">{dayNames[displayIndex]}</span>
+                      </label>
                     </div>
-                    <div>
-                      <label className="block text-sm text-text-light mb-1">Fin</label>
-                      <input
-                        type="time"
-                        className="input"
-                        value={day.end_time || '17:00'}
-                        onChange={(e) => handleTimeChange(day.day_of_week, 'end_time', e.target.value)}
-                      />
-                    </div>
+                    {/* Horaires */}
+                    {day.is_working_day ? (
+                      <div className="flex items-center gap-4 flex-1">
+                        <div>
+                          <label className="block text-sm text-text-light mb-1">Début</label>
+                          <input
+                            type="time"
+                            className="input"
+                            value={day.start_time || '09:00'}
+                            onChange={(e) => handleTimeChange(day.day_of_week, 'start_time', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-text-light mb-1">Fin</label>
+                          <input
+                            type="time"
+                            className="input"
+                            value={day.end_time || '17:00'}
+                            onChange={(e) => handleTimeChange(day.day_of_week, 'end_time', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex-1 text-text-light italic">Jour de repos</div>
+                    )}
                   </div>
-                ) : (
-                  <div className="flex-1 text-text-light italic">Jour de repos</div>
-                )}
-              </div>
-            </div>
-          ))}
+                </div>
+              );
+            })}
         </div>
 
         <div className="mt-8 p-4 bg-primary/10 rounded-xl">
