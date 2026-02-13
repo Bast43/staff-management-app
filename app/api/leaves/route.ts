@@ -122,11 +122,11 @@ export async function POST(request: NextRequest) {
 
       // Calculer les jours ouvrés selon la grille
       let workingDays = 0
-      const current = new Date(start_date)
-      const end = new Date(end_date)
+      const current = new Date(start_date + 'T00:00:00Z')
+      const end = new Date(end_date + 'T00:00:00Z')
 
       while (current <= end) {
-        const dayOfWeek = current.getDay()
+        const dayOfWeek = current.getUTCDay() // 0 = dimanche, 6 = samedi
 
         if (schedules && schedules.length > 0) {
           const daySchedule = schedules.find(s => s.day_of_week === dayOfWeek)
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        current.setDate(current.getDate() + 1)
+        current.setUTCDate(current.getUTCDate() + 1)
       }
 
       // Vérifier le solde

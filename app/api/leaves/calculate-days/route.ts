@@ -30,8 +30,8 @@ export async function GET(request: NextRequest) {
 
     // Calculer les jours ouvrés
     let workingDays = 0
-    const current = new Date(startDate)
-    const end = new Date(endDate)
+    const current = new Date(startDate + 'T00:00:00Z')
+    const end = new Date(endDate + 'T00:00:00Z')
 
     while (current <= end) {
       const dayOfWeek = current.getDay() // 0 = dimanche, 6 = samedi
@@ -49,12 +49,12 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      current.setDate(current.getDate() + 1)
+      current.setUTCDate(current.getUTCDate() + 1)
     }
 
     return NextResponse.json({
       working_days: workingDays,
-      total_days: Math.ceil((end.getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1,
+      total_days: Math.ceil((end.getTime() - new Date(startDate + 'T00:00:00Z').getTime()) / (1000 * 60 * 60 * 24)) + 1,
     })
   } catch (error) {
     console.error('Calculate days error:', error)

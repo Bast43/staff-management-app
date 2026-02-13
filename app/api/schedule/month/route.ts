@@ -72,8 +72,8 @@ export async function GET(request: NextRequest) {
     }))
 
     // Calculer le premier et dernier jour du mois
-    const firstDay = new Date(year, month - 1, 1)
-    const lastDay = new Date(year, month, 0)
+    const firstDay = new Date(Date.UTC(year, month - 1, 1))
+    const lastDay = new Date(Date.UTC(year, month, 0))
     const startDate = firstDay.toISOString().split('T')[0]
     const endDate = lastDay.toISOString().split('T')[0]
 
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
 
     while (currentDate <= lastDay) {
       const dateStr = currentDate.toISOString().split('T')[0]
-      const dayOfWeek = currentDate.getDay() // 0 = dimanche, 6 = samedi
+      const dayOfWeek = currentDate.getUTCDay() // 0 = dimanche, 6 = samedi
 
       const dayEmployees = employeesWithColors.map(emp => {
         // Vérifier si en congé
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
         employees: dayEmployees,
       })
 
-      currentDate.setDate(currentDate.getDate() + 1)
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1)
     }
 
     return NextResponse.json(monthSchedule)

@@ -57,10 +57,10 @@ export async function GET(request: NextRequest) {
 
         // Calculer jours travaillés du mois
         let totalWorkDays = 0
-        const currentDate = new Date(startDate)
+        const currentDate = new Date(startDate + 'T00:00:00Z')
         
         while (currentDate <= endDate) {
-          const dayOfWeek = currentDate.getDay()
+          const dayOfWeek = currentDate.getUTCDay() // 0 = dimanche, 6 = samedi
           
           if (schedules && schedules.length > 0) {
             const daySchedule = schedules.find(s => s.day_of_week === dayOfWeek)
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
             }
           }
           
-          currentDate.setDate(currentDate.getDate() + 1)
+          currentDate.setUTCDate(currentDate.getUTCDate() + 1)
         }
 
         // Compter présences
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
           
           const leaveDate = new Date(leaveStart)
           while (leaveDate <= leaveEnd) {
-            const dayOfWeek = leaveDate.getDay()
+            const dayOfWeek = leaveDate.getUTCDay() // 0 = dimanche, 6 = samedi
             
             if (schedules && schedules.length > 0) {
               const daySchedule = schedules.find(s => s.day_of_week === dayOfWeek)
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
               }
             }
             
-            leaveDate.setDate(leaveDate.getDate() + 1)
+            leaveDate.setUTCDate(leaveDate.getUTCDate() + 1)
           }
         })
 
