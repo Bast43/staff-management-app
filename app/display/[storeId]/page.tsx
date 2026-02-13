@@ -84,15 +84,14 @@ export default function StoreDisplay() {
     const startDayOfWeek = firstDay.getDay()
 
     const days: (Date | null)[] = []
-    
-    for (let i = 0; i < (startDayOfWeek === 0 ? 6 : startDayOfWeek - 1); i++) {
+    // Correction : lundi = 1, donc (startDayOfWeek + 6) % 7
+    const emptyDays = (startDayOfWeek + 6) % 7
+    for (let i = 0; i < emptyDays; i++) {
       days.push(null)
     }
-    
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day))
     }
-    
     return days
   }
 
