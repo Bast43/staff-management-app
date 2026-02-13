@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg-main text-text-main font-sans;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-200 inline-flex items-center gap-2;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5;
+  }
+  
+  .btn-secondary {
+    @apply bg-card-bg text-text-main border border-border hover:bg-bg-main;
+  }
+  
+  .btn-success {
+    @apply bg-success text-white hover:bg-success/90;
+  }
+  
+  .btn-danger {
+    @apply bg-danger text-white hover:bg-danger/90;
+  }
+  
+  .btn-small {
+    @apply px-4 py-2 text-sm;
+  }
+  
+  .card {
+    @apply bg-card-bg rounded-2xl p-6 shadow-sm;
+  }
+  
+  .input {
+    @apply w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all;
+  }
+  
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold;
+  }
+  
+  .badge-pending {
+    @apply bg-warning/15 text-yellow-700;
+  }
+  
+  .badge-approved {
+    @apply bg-success/15 text-green-700;
+  }
+  
+  .badge-rejected {
+    @apply bg-danger/15 text-red-700;
+  }
+  
+  .badge-present {
+    @apply bg-success/15 text-green-700;
+  }
+  
+  .badge-absent {
+    @apply bg-danger/15 text-red-700;
+  }
+  
+  .stat-card {
+    @apply bg-card-bg rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow;
+  }
+  
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer;
+  }
+  
+  .nav-item:hover {
+    @apply bg-bg-main;
+  }
+  
+  .nav-item.active {
+    @apply bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg;
+  }
+}
