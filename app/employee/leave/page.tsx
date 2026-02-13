@@ -10,6 +10,8 @@ type LeaveRequest = {
   type: string
   reason: string
   status: string
+  calculated_days?: number
+  recovery_hours_requested?: number
   admin_comment: string | null
   submitted_at: string
   reviewed_at: string | null
