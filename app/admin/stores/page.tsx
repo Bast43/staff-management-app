@@ -221,6 +221,22 @@ export default function AdminStores() {
               </div>
             </div>
 
+            {/* Liste des employés attendus aujourd'hui avec horaire */}
+            {store.expectedEmployees && store.expectedEmployees.length > 0 && (
+              <div className="mt-4">
+                <div className="font-semibold mb-2 text-text-main">Employés attendus aujourd'hui :</div>
+                <ul className="space-y-1">
+                  {store.expectedEmployees.map((emp: { id: string, name: string, work_hours: string | null }) => (
+                    <li key={emp.id} className="flex items-center gap-2 text-sm">
+                      <span className="font-medium">{emp.name}</span>
+                      {emp.work_hours && (
+                        <span className="px-2 py-0.5 bg-primary/10 text-primary rounded font-mono text-xs">{emp.work_hours}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="mt-4">
               <a
                 href={`/admin/employees?store=${store.id}`}

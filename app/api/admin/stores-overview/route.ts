@@ -75,24 +75,21 @@ export async function GET(request: NextRequest) {
 
         // Calculer combien doivent travailler aujourd'hui
         let expectedToday = 0
+        const expectedEmployees: { id: string, work_hours: string | null }[] = []
         for (const empId of employeeIds) {
-          // Si en congé, ne compte pas
           if (onLeaveIds.includes(empId)) {
             continue
           }
-
-          // Vérifier grille horaire
           const schedule = schedules?.find(s => s.user_id === empId)
-          
           if (schedule) {
-            // Si a une grille, suivre la grille
             if (schedule.is_working_day) {
               expectedToday++
+              expectedEmployees.push({ id: empId, work_hours: schedule.work_hours || null })
             }
           } else {
-            // Pas de grille : par défaut lundi-vendredi
             if (todayDayOfWeek >= 1 && todayDayOfWeek <= 5) {
               expectedToday++
+              expectedEmployees.push({ id: empId, work_hours: null })
             }
           }
         }
@@ -113,12 +110,26 @@ export async function GET(request: NextRequest) {
           .eq('date', today)
           .eq('status', 'absent')
 
+        // Récupérer les infos des employés attendus
+        let employeesInfo: { id: string, name: string, work_hours: string | null }[] = []
+        if (expectedEmployees.length > 0) {
+          const { data: usersInfo } = await supabase
+            .from('users')
+            .select('id, name')
+            .in('id', expectedEmployees.map(e => e.id))
+          employeesInfo = (usersInfo || []).map(u => ({
+            id: u.id,
+            name: u.name,
+            work_hours: expectedEmployees.find(e => e.id === u.id)?.work_hours || null
+          }))
+        }
         return {
           ...store,
           totalEmployees,
           expectedToday,
           presentCount: presentCount || 0,
           absentCount: absentCount || 0,
+          expectedEmployees: employeesInfo,
         }
       })
     )
