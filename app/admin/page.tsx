@@ -225,15 +225,20 @@ export default function AdminDashboard() {
                         <div className={`text-sm font-semibold mb-2 ${isToday ? 'text-primary' : 'text-text-light'}`}>
                           {date.getDate()}
                         </div>
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-col gap-1 items-start">
                           {workingEmployees.map((emp) => (
-                            <div
-                              key={emp.id}
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm"
-                              style={{ backgroundColor: emp.color }}
-                              title={emp.name}
-                            >
-                              {emp.initials}
+                            <div key={emp.id} className="flex items-center gap-2">
+                              <div
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm"
+                                style={{ backgroundColor: emp.color }}
+                                title={emp.name}
+                              >
+                                {emp.initials}
+                              </div>
+                              {/* Affichage horaire si disponible */}
+                              {emp.schedule && (
+                                <span className="text-xs text-text-light font-mono">{emp.schedule}</span>
+                              )}
                             </div>
                           ))}
                         </div>

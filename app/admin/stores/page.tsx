@@ -26,6 +26,15 @@ export default function AdminStores() {
     loadStores()
   }, [])
 
+  // Recharge les stats magasins après chaque modification de présence/absence
+  useEffect(() => {
+    const handler = () => {
+      loadStores()
+    }
+    window.addEventListener('attendance-updated', handler)
+    return () => window.removeEventListener('attendance-updated', handler)
+  }, [])
+
   const loadStores = async () => {
     try {
       const res = await fetch('/api/admin/stores-overview')

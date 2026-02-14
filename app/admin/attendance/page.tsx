@@ -117,6 +117,8 @@ export default function AdminAttendance() {
         loadWeekData()
         setShowJustifyModal(false)
         setJustification('')
+        // Déclenche un événement pour forcer la maj des stats magasins
+        window.dispatchEvent(new Event('attendance-updated'))
       } else {
         alert('Erreur lors de la mise à jour')
       }

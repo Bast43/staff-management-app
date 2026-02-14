@@ -14,8 +14,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     }
 
-    const today = new Date().toISOString().split('T')[0]
-    const todayDayOfWeek = new Date().getDay() // 0 = dimanche, 6 = samedi
+    // Utilise la date du jour en UTC pour éviter les soucis de fuseau
+    const now = new Date()
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+    const today = todayUTC.toISOString().split('T')[0]
+    const todayDayOfWeek = todayUTC.getUTCDay() // 0 = dimanche, 6 = samedi
 
     // Récupérer tous les magasins
     const { data: stores } = await supabase
