@@ -12,6 +12,7 @@ type Store = {
   expectedToday: number
   presentCount: number
   absentCount: number
+  expectedEmployees?: any[]
 }
 
 export default function AdminStores() {
