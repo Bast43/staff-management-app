@@ -235,6 +235,9 @@ export default function AdminDashboard() {
                               >
                                 {emp.initials}
                               </div>
+                              {emp.work_hours && (
+                                <span className="px-2 py-0.5 bg-primary/10 text-primary rounded font-mono text-xs">{emp.work_hours}</span>
+                              )}
                             </div>
                           ))}
                         </div>

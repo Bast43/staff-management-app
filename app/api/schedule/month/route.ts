@@ -116,20 +116,30 @@ export async function GET(request: NextRequest) {
           dateStr <= leave.end_date
         ) || false
 
+        let work_hours = null
+        // Vérifier la grille horaire (stockée en JS: 0=dimanche, 1=lundi, ...)
+        const userSchedule = scheduleMap.get(emp.id)
+        if (userSchedule && userSchedule.length > 0) {
+          const daySchedule = userSchedule.find(s => s.day_of_week === jsDayOfWeek)
+          if (daySchedule && daySchedule.is_working_day) {
+            work_hours = daySchedule.work_hours || null
+          }
+        }
+
         if (isOnLeave) {
           return {
             ...emp,
             isWorking: false,
+            work_hours: null,
           }
         }
 
-        // Vérifier la grille horaire (stockée en JS: 0=dimanche, 1=lundi, ...)
-        const userSchedule = scheduleMap.get(emp.id)
         if (userSchedule && userSchedule.length > 0) {
           const daySchedule = userSchedule.find(s => s.day_of_week === jsDayOfWeek)
           return {
             ...emp,
             isWorking: daySchedule?.is_working_day || false,
+            work_hours: work_hours,
           }
         }
 
@@ -137,6 +147,7 @@ export async function GET(request: NextRequest) {
         return {
           ...emp,
           isWorking: jsDayOfWeek >= 1 && jsDayOfWeek <= 5,
+          work_hours: null,
         }
       })
 
