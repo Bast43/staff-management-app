@@ -235,10 +235,6 @@ export default function AdminDashboard() {
                               >
                                 {emp.initials}
                               </div>
-                              {/* Affichage horaire si disponible */}
-                              {emp.schedule && (
-                                <span className="text-xs text-text-light font-mono">{emp.schedule}</span>
-                              )}
                             </div>
                           ))}
                         </div>
