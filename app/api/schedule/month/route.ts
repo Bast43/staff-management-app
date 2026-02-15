@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       color: getColorForEmployee(index),
     }))
 
-    // Calculer le premier et dernier jour du mois
+    // Calculer le premier et dernier jour du mois EN UTC
     const firstDay = new Date(Date.UTC(year, month - 1, 1))
     const lastDay = new Date(Date.UTC(year, month, 0))
     const startDate = firstDay.toISOString().split('T')[0]
@@ -106,26 +106,17 @@ export async function GET(request: NextRequest) {
 
     while (currentDate <= lastDay) {
       const dateStr = currentDate.toISOString().split('T')[0]
-      const jsDayOfWeek = currentDate.getUTCDay(); // 0=dimanche, 1=lundi, ..., 6=samedi
+      const jsDayOfWeek = currentDate.getUTCDay() // 0=dimanche, 1=lundi, ..., 6=samedi
 
       const dayEmployees = employeesWithColors.map(emp => {
-        // Vérifier si en congé
+        // ✅ 1. Vérifier si en congé
         const isOnLeave = leaves?.some(leave => 
           leave.user_id === emp.id &&
           dateStr >= leave.start_date &&
           dateStr <= leave.end_date
         ) || false
 
-        let work_hours = null
-        // Vérifier la grille horaire (stockée en JS: 0=dimanche, 1=lundi, ...)
-        const userSchedule = scheduleMap.get(emp.id)
-        if (userSchedule && userSchedule.length > 0) {
-          const daySchedule = userSchedule.find(s => s.day_of_week === jsDayOfWeek)
-          if (daySchedule && daySchedule.is_working_day) {
-            work_hours = daySchedule.work_hours || null
-          }
-        }
-
+        // Si en congé, retourner directement
         if (isOnLeave) {
           return {
             ...emp,
@@ -134,20 +125,31 @@ export async function GET(request: NextRequest) {
           }
         }
 
+        // ✅ 2. Vérifier la grille horaire personnalisée
+        const userSchedule = scheduleMap.get(emp.id)
         if (userSchedule && userSchedule.length > 0) {
           const daySchedule = userSchedule.find(s => s.day_of_week === jsDayOfWeek)
+          
+          // ✅ CORRECTION IMPORTANTE : Construire work_hours à partir de start_time et end_time
+          let workHours = null
+          if (daySchedule?.is_working_day && daySchedule.start_time && daySchedule.end_time) {
+            // Format: "09:00-17:00"
+            workHours = `${daySchedule.start_time.slice(0, 5)}-${daySchedule.end_time.slice(0, 5)}`
+          }
+          
           return {
             ...emp,
             isWorking: daySchedule?.is_working_day || false,
-            work_hours: work_hours,
+            work_hours: workHours,
           }
         }
 
-        // Par défaut : lundi-vendredi (jsDayOfWeek 1-5)
+        // ✅ 3. Par défaut : lundi-vendredi 09:00-17:00
+        const isDefaultWorkingDay = jsDayOfWeek >= 1 && jsDayOfWeek <= 5
         return {
           ...emp,
-          isWorking: jsDayOfWeek >= 1 && jsDayOfWeek <= 5,
-          work_hours: null,
+          isWorking: isDefaultWorkingDay,
+          work_hours: isDefaultWorkingDay ? '09:00-17:00' : null,
         }
       })
 
@@ -156,6 +158,7 @@ export async function GET(request: NextRequest) {
         employees: dayEmployees,
       })
 
+      // ✅ Incrémenter en UTC
       currentDate.setUTCDate(currentDate.getUTCDate() + 1)
     }
 

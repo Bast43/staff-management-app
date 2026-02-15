@@ -1,70 +1,115 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
-import { ReactNode } from 'react'
-
-type NavItem = {
-  id: string
-  icon: string
-  label: string
-  href: string
-}
+import { useState } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 type SidebarProps = {
   userName: string
   userRole: string
   userAvatar: string
-  navItems: NavItem[]
+  navItems: Array<{
+    id: string
+    icon: string
+    label: string
+    href: string
+  }>
   onLogout: () => void
 }
 
 export default function Sidebar({ userName, userRole, userAvatar, navItems, onLogout }: SidebarProps) {
+  const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
 
   return (
-    <aside className="w-72 bg-card-bg border-r border-border p-6 flex flex-col h-screen sticky top-0">
-      <div className="mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-white text-xl font-bold">
-            GP
-          </div>
-          <span className="text-xl font-bold text-primary">Gestion Personnel</span>
-        </div>
-      </div>
-
-      <nav className="flex-1 space-y-2">
-        {navItems.map((item) => (
-          <div
-            key={item.id}
-            onClick={() => router.push(item.href)}
-            className={`nav-item ${pathname === item.href ? 'active' : ''}`}
-          >
-            <span className="text-xl">{item.icon}</span>
-            <span className="font-medium">{item.label}</span>
-          </div>
-        ))}
-
-        <div
-          onClick={onLogout}
-          className="nav-item text-danger hover:bg-danger/10 cursor-pointer mt-8"
+    <>
+      {/* ✅ BOUTON HAMBURGER MOBILE */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-primary text-white rounded-xl shadow-lg hover:bg-primary/90 transition-all active:scale-95"
+        aria-label="Menu"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          <span className="text-xl">🚪</span>
-          <span className="font-medium">Déconnexion</span>
-        </div>
-      </nav>
+          {isOpen ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          )}
+        </svg>
+      </button>
 
-      <div className="pt-4 border-t border-border">
-        <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-bg-main transition-colors cursor-pointer">
-          <div className="w-10 h-10 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center text-white text-sm font-semibold">
-            {userAvatar}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold text-sm truncate">{userName}</div>
-            <div className="text-xs text-text-light truncate">{userRole}</div>
+      {/* ✅ OVERLAY MOBILE (ferme au clic) */}
+      {isOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* ✅ SIDEBAR RESPONSIVE */}
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-40
+        w-72 bg-card-bg border-r border-border
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        flex flex-col
+      `}>
+        {/* Profil */}
+        <div className="p-6 border-b border-border flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-lg font-bold flex-shrink-0">
+              {userAvatar}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold truncate">{userName}</div>
+              <div className="text-sm text-text-light truncate">{userRole}</div>
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+
+        {/* Navigation */}
+        <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                onClick={() => setIsOpen(false)} // ✅ Ferme le menu après clic
+                className={`
+                  flex items-center gap-3 px-4 py-3 rounded-xl transition-all
+                  ${isActive 
+                    ? 'bg-primary text-white shadow-lg' 
+                    : 'hover:bg-bg-main text-text-main'
+                  }
+                `}
+              >
+                <span className="text-xl flex-shrink-0">{item.icon}</span>
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Logout */}
+        <div className="p-4 border-t border-border flex-shrink-0">
+          <button
+            onClick={() => {
+              setIsOpen(false)
+              onLogout()
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-danger/10 text-danger transition-all"
+          >
+            <span className="text-xl">🚪</span>
+            <span className="font-medium">Déconnexion</span>
+          </button>
+        </div>
+      </aside>
+    </>
   )
 }

@@ -14,7 +14,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    // ← CORRIGÉ : Format de date plus strict pour éviter les problèmes timezone
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+    console.log('📅 Date today:', today) // ← AJOUTÉ : Debug
 
     // Récupérer tous les employés
     const { data: employees } = await supabase
@@ -31,30 +35,36 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Compter présents/absents aujourd'hui
-    const { data: attendanceToday } = await supabase
+    // ← CORRIGÉ : Utiliser count exact de Supabase au lieu de filter
+    const { count: presentCount } = await supabase
       .from('attendance')
-      .select('status')
+      .select('id', { count: 'exact', head: true })
       .eq('date', today)
+      .eq('status', 'present')
 
-    const presentToday = attendanceToday?.filter(a => a.status === 'present').length || 0
-    const absentToday = attendanceToday?.filter(a => a.status === 'absent').length || 0
+    const { count: absentCount } = await supabase
+      .from('attendance')
+      .select('id', { count: 'exact', head: true })
+      .eq('date', today)
+      .eq('status', 'absent')
+
+    console.log('✓ Présents:', presentCount, '✕ Absents:', absentCount) // ← AJOUTÉ : Debug
 
     // Compter demandes en attente
-    const { data: pendingLeaves } = await supabase
+    const { count: pendingCount } = await supabase
       .from('leave_requests')
-      .select('id')
+      .select('id', { count: 'exact', head: true })
       .eq('status', 'pending')
 
-    // Calculer total congés disponibles (CORRECTION DU BUG)
+    // Calculer total congés disponibles
     const totalLeaveAvailable = employees.reduce((sum, emp) => {
       return sum + (emp.total_leave_per_year - emp.used_leave)
     }, 0)
 
     return NextResponse.json({
-      presentToday,
-      absentToday,
-      pendingRequests: pendingLeaves?.length || 0,
+      presentToday: presentCount || 0,
+      absentToday: absentCount || 0,
+      pendingRequests: pendingCount || 0,
       totalLeaveAvailable,
     })
   } catch (error) {

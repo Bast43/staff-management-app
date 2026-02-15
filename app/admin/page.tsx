@@ -7,13 +7,6 @@ type Store = {
   name: string
 }
 
-type Employee = {
-  id: string
-  name: string
-  initials: string
-  color: string
-}
-
 type DaySchedule = {
   date: string
   employees: {
@@ -22,6 +15,7 @@ type DaySchedule = {
     initials: string
     color: string
     isWorking: boolean
+    work_hours: string | null  // ✅ AJOUTÉ
   }[]
 }
 
@@ -145,18 +139,18 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Tableau de bord</h1>
-        <p className="text-text-light">Planning mensuel par magasin</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2">Tableau de bord</h1>
+        <p className="text-text-light text-sm sm:text-base">Planning mensuel par magasin</p>
       </div>
 
-      {/* Sélection magasin et navigation mois */}
+      {/* Sélection magasin et navigation mois - ✅ RESPONSIVE */}
       <div className="card mb-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <label className="font-semibold text-lg">Magasin :</label>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+            <label className="font-semibold text-base sm:text-lg">Magasin :</label>
             <select
-              className="input text-lg"
+              className="input text-base sm:text-lg w-full sm:w-auto"
               value={selectedStore}
               onChange={(e) => setSelectedStore(e.target.value)}
             >
@@ -168,75 +162,91 @@ export default function AdminDashboard() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button onClick={previousMonth} className="btn btn-secondary btn-small">
-              ← Mois précédent
+          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+            <button onClick={previousMonth} className="btn btn-secondary btn-small whitespace-nowrap">
+              ← Précédent
             </button>
-            <button onClick={thisMonth} className="btn btn-primary btn-small">
+            <button onClick={thisMonth} className="btn btn-primary btn-small whitespace-nowrap">
               Ce mois
             </button>
-            <button onClick={nextMonth} className="btn btn-secondary btn-small">
-              Mois suivant →
+            <button onClick={nextMonth} className="btn btn-secondary btn-small whitespace-nowrap">
+              Suivant →
             </button>
           </div>
         </div>
 
         <div className="mt-4 text-center">
-          <h2 className="text-2xl font-bold capitalize">{monthName}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold capitalize">{monthName}</h2>
         </div>
       </div>
 
-      {/* Calendrier mensuel avec pastilles */}
+      {/* ✅ CALENDRIER RESPONSIVE COMPLET */}
       <div className="card mb-8">
-        <div className="overflow-x-auto">
-          <div className="min-w-[800px]">
+        {/* Container scrollable horizontal */}
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          {/* Largeur minimum pour forcer le scroll sur mobile */}
+          <div className="min-w-[640px] px-4 sm:px-0">
+            
             {/* En-têtes jours de la semaine */}
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {weekDays.map((day, i) => (
-                <div key={day} className="text-center font-semibold py-2 text-sm">
-                  {weekDays[i]}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+              {weekDays.map((day) => (
+                <div key={day} className="text-center font-semibold py-2 text-xs sm:text-sm">
+                  {day}
                 </div>
               ))}
             </div>
 
-            {/* Grille du calendrier */}
-            <div className="grid grid-cols-7 gap-1">
+            {/* Grille calendrier */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
               {days.map((date, index) => {
                 const schedule = getScheduleForDate(date)
-                const isWeekend = date && (date.getDay() === 0 || date.getDay() === 6)
+                const isWeekend = date && (date.getUTCDay() === 0 || date.getUTCDay() === 6)
                 const isToday = date && date.toDateString() === new Date().toDateString()
                 const workingEmployees = schedule?.employees.filter(e => e.isWorking) || []
 
                 return (
                   <div
                     key={index}
-                    className={`min-h-[120px] p-2 rounded-lg border ${
-                      !date 
-                        ? 'bg-transparent border-transparent'
-                        : isToday
-                        ? 'border-2 border-primary bg-primary/5'
-                        : isWeekend
-                        ? 'bg-bg-main border-border'
-                        : 'bg-card-bg border-border'
-                    }`}
+                    className={`
+                      min-h-[80px] sm:min-h-[100px] lg:min-h-[120px]
+                      p-1.5 sm:p-2 lg:p-3
+                      rounded-lg border text-xs sm:text-sm
+                      ${
+                        !date 
+                          ? 'bg-transparent border-transparent'
+                          : isToday
+                          ? 'border-2 border-primary bg-primary/5'
+                          : isWeekend
+                          ? 'bg-bg-main border-border'
+                          : 'bg-card-bg border-border'
+                      }
+                    `}
                   >
                     {date && (
                       <>
-                        <div className={`text-sm font-semibold mb-2 ${isToday ? 'text-primary' : 'text-text-light'}`}>
+                        {/* Numéro du jour */}
+                        <div className={`text-xs sm:text-sm font-semibold mb-1 sm:mb-2 ${isToday ? 'text-primary' : 'text-text-light'}`}>
                           {date.getDate()}
                         </div>
-                        <div className="flex flex-col gap-1 items-start">
+                        
+                        {/* ✅ PASTILLES AVEC HORAIRES */}
+                        <div className="flex flex-col gap-0.5 sm:gap-1 items-start">
                           {workingEmployees.map((emp) => (
-                            <div key={emp.id} className="flex items-center gap-2">
+                            <div key={emp.id} className="flex items-center gap-1 sm:gap-2 group w-full">
+                              {/* Pastille */}
                               <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm"
+                                className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-white text-[10px] sm:text-xs font-bold shadow-sm flex-shrink-0"
                                 style={{ backgroundColor: emp.color }}
                                 title={emp.name}
                               >
                                 {emp.initials}
                               </div>
+                              
+                              {/* ✅ HORAIRES (apparaît au survol sur desktop) */}
                               {emp.work_hours && (
-                                <span className="px-2 py-0.5 bg-primary/10 text-primary rounded font-mono text-xs">{emp.work_hours}</span>
+                                <span className="hidden sm:group-hover:inline-block lg:inline-block px-1.5 sm:px-2 py-0.5 bg-gray-800 text-white rounded text-[10px] sm:text-xs font-mono whitespace-nowrap">
+                                  {emp.work_hours}
+                                </span>
                               )}
                             </div>
                           ))}
@@ -250,49 +260,54 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Indication scroll sur mobile */}
+        <div className="sm:hidden text-center text-xs text-gray-500 mt-3 py-2 bg-gray-50 rounded-lg">
+          👈 Glissez pour voir plus 👉
+        </div>
+
         {/* Légende */}
-        <div className="mt-6 pt-6 border-t border-border">
-          <h3 className="font-semibold mb-3">Légende des employés</h3>
-          <div className="flex flex-wrap gap-3">
+        <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
+          <h3 className="font-semibold mb-3 text-sm sm:text-base">Légende des employés</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
             {monthSchedule.length > 0 && monthSchedule[0]?.employees.map((emp) => (
               <div key={emp.id} className="flex items-center gap-2">
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                  className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                   style={{ backgroundColor: emp.color }}
                 >
                   {emp.initials}
                 </div>
-                <span className="text-sm">{emp.name}</span>
+                <span className="text-xs sm:text-sm truncate">{emp.name}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Demandes en attente */}
+      {/* Demandes en attente - ✅ RESPONSIVE */}
       <div className="card">
-        <h2 className="text-2xl font-bold mb-6">Demandes de congé en attente</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Demandes de congé en attente</h2>
         
         {pendingRequests.length > 0 ? (
           <div className="space-y-3">
             {pendingRequests.map((request) => (
-              <div key={request.id} className="p-4 bg-bg-main rounded-xl flex items-center justify-between">
-                <div>
-                  <div className="font-semibold">{request.user_name}</div>
-                  <div className="text-sm text-text-light">
+              <div key={request.id} className="p-4 bg-bg-main rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <div className="font-semibold text-sm sm:text-base">{request.user_name}</div>
+                  <div className="text-xs sm:text-sm text-text-light mt-1">
                     {new Date(request.start_date).toLocaleDateString('fr-FR')} 
                     {' → '}
                     {new Date(request.end_date).toLocaleDateString('fr-FR')}
                   </div>
                 </div>
-                <a href="/admin/leaves" className="btn btn-primary btn-small">
+                <a href="/admin/leaves" className="btn btn-primary btn-small w-full sm:w-auto text-center">
                   Examiner
                 </a>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-text-light">
+          <div className="text-center py-8 text-text-light text-sm sm:text-base">
             Aucune demande en attente
           </div>
         )}

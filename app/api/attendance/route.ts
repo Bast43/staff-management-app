@@ -21,6 +21,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
     }
 
+    console.log('📝 Marquage attendance:', { user_id, date, status }) // ← AJOUTÉ : Debug
+
     // Récupérer l'employé pour avoir son store_id
     const { data: employee } = await supabase
       .from('users')
@@ -32,16 +34,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Employé non trouvé' }, { status: 404 })
     }
 
-    // Vérifier si une présence existe déjà pour ce jour
+    // ← CORRIGÉ : maybeSingle() au lieu de single() pour éviter les erreurs
     const { data: existing } = await supabase
       .from('attendance')
       .select('id')
       .eq('user_id', user_id)
       .eq('date', date)
-      .single()
+      .maybeSingle() // ← IMPORTANT : maybeSingle() ne crashe pas si 0 résultat
 
     let result
     if (existing) {
+      console.log('🔄 Mise à jour attendance existante:', existing.id) // ← AJOUTÉ : Debug
+      
       // Mettre à jour
       const { data, error } = await supabase
         .from('attendance')
@@ -55,9 +59,14 @@ export async function POST(request: NextRequest) {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Erreur update:', error) // ← AJOUTÉ : Debug
+        throw error
+      }
       result = data
     } else {
+      console.log('➕ Création nouvelle attendance') // ← AJOUTÉ : Debug
+      
       // Créer
       const { data, error } = await supabase
         .from('attendance')
@@ -72,9 +81,14 @@ export async function POST(request: NextRequest) {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Erreur insert:', error) // ← AJOUTÉ : Debug
+        throw error
+      }
       result = data
     }
+
+    console.log('✅ Attendance enregistrée:', result.id) // ← AJOUTÉ : Debug
 
     return NextResponse.json(result)
   } catch (error) {

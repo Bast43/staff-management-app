@@ -12,6 +12,7 @@ type DaySchedule = {
     initials: string
     color: string
     isWorking: boolean
+    work_hours: string | null  // ✅ AJOUTÉ
   }[]
 }
 
@@ -28,8 +29,8 @@ export default function EmployeeDashboard() {
   const [monthSchedule, setMonthSchedule] = useState<DaySchedule[]>([])
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [leaveForm, setLeaveForm] = useState({
-    request_type: 'leave_days', // 'leave_days' ou 'recovery_hours'
-    period_type: 'period', // 'single_day' ou 'period'
+    request_type: 'leave_days',
+    period_type: 'period',
     start_date: '',
     end_date: '',
     single_date: '',
@@ -142,7 +143,6 @@ export default function EmployeeDashboard() {
         }
         payload.request_type = 'leave_days'
       } else {
-        // Demande d'heures récup
         payload.request_type = 'recovery_hours'
         payload.recovery_hours = leaveForm.recovery_hours_requested
         payload.start_date = new Date().toISOString().split('T')[0]
@@ -232,61 +232,36 @@ export default function EmployeeDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Bonjour {user?.name || ''} !</h1>
-        <p className="text-text-light">{user?.position || ''} • {user?.store_name || ''}</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2">Bonjour {user?.name || ''} !</h1>
+        <p className="text-text-light text-sm sm:text-base">{user?.position || ''} • {user?.store_name || ''}</p>
       </div>
 
-      {/* Stats personnelles */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-        <StatCard
-          icon="🏖️"
-          iconColor="green"
-          value={stats.available}
-          label="Jours disponibles"
-        />
-        <StatCard
-          icon="📅"
-          iconColor="blue"
-          value={stats.used}
-          label="Jours utilisés"
-        />
-        <StatCard
-          icon="⏳"
-          iconColor="yellow"
-          value={stats.pending}
-          label="En attente"
-        />
-        <StatCard
-          icon="✓"
-          iconColor="green"
-          value={stats.approved}
-          label="Approuvés"
-        />
-        <StatCard
-          icon="⏰"
-          iconColor="purple"
-          value={`${stats.recovery_hours}h`}
-          label="Heures récup"
-        />
+      {/* Stats personnelles - ✅ RESPONSIVE */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+        <StatCard icon="🏖️" iconColor="green" value={stats.available} label="Jours disponibles" />
+        <StatCard icon="📅" iconColor="blue" value={stats.used} label="Jours utilisés" />
+        <StatCard icon="⏳" iconColor="yellow" value={stats.pending} label="En attente" />
+        <StatCard icon="✓" iconColor="green" value={stats.approved} label="Approuvés" />
+        <StatCard icon="⏰" iconColor="purple" value={`${stats.recovery_hours}h`} label="Heures récup" />
       </div>
 
-      {/* Barre de progression */}
+      {/* Barre de progression - ✅ RESPONSIVE */}
       {user && (
-        <div className="card mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Utilisation des congés</h3>
-            <button onClick={() => setShowLeaveModal(true)} className="btn btn-primary">
+        <div className="card mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+            <h3 className="text-base sm:text-lg font-semibold">Utilisation des congés</h3>
+            <button onClick={() => setShowLeaveModal(true)} className="btn btn-primary w-full sm:w-auto">
               ➕ Nouvelle demande
             </button>
           </div>
-          <div className="mb-2 flex justify-between text-sm">
+          <div className="mb-2 flex justify-between text-xs sm:text-sm">
             <span className="text-text-light">
               {stats.used} / {user.total_leave_per_year} jours utilisés
             </span>
             <span className="text-text-light">{usagePercent.toFixed(0)}%</span>
           </div>
-          <div className="w-full bg-bg-main rounded-full h-4 overflow-hidden">
+          <div className="w-full bg-bg-main rounded-full h-3 sm:h-4 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
                 usagePercent >= 90 ? 'bg-danger' : usagePercent >= 70 ? 'bg-warning' : 'bg-success'
@@ -297,71 +272,90 @@ export default function EmployeeDashboard() {
         </div>
       )}
 
-      {/* Planning de l'équipe */}
+      {/* ✅ PLANNING RESPONSIVE COMPLET */}
       <div className="card mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Planning de l'équipe</h2>
-          <div className="flex items-center gap-2">
-            <button onClick={previousMonth} className="btn btn-secondary btn-small">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold">Planning de l'équipe</h2>
+          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+            <button onClick={previousMonth} className="btn btn-secondary btn-small whitespace-nowrap">
               ← Précédent
             </button>
-            <button onClick={thisMonth} className="btn btn-primary btn-small">
+            <button onClick={thisMonth} className="btn btn-primary btn-small whitespace-nowrap">
               Ce mois
             </button>
-            <button onClick={nextMonth} className="btn btn-secondary btn-small">
+            <button onClick={nextMonth} className="btn btn-secondary btn-small whitespace-nowrap">
               Suivant →
             </button>
           </div>
         </div>
 
         <div className="mb-4 text-center">
-          <h3 className="text-xl font-semibold capitalize">{monthName}</h3>
+          <h3 className="text-lg sm:text-xl font-semibold capitalize">{monthName}</h3>
         </div>
 
-        <div className="overflow-x-auto">
-          <div className="min-w-[800px]">
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {weekDays.map((day, i) => (
-                <div key={day} className="text-center font-semibold py-2 text-sm">
-                  {weekDays[i]}
+        {/* Container scrollable horizontal */}
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <div className="min-w-[640px] px-4 sm:px-0">
+            {/* En-têtes jours */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+              {weekDays.map((day) => (
+                <div key={day} className="text-center font-semibold py-2 text-xs sm:text-sm">
+                  {day}
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-1">
+            {/* Grille calendrier */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
               {days.map((date, index) => {
                 const schedule = getScheduleForDate(date)
-                const isWeekend = date && (date.getDay() === 0 || date.getDay() === 6)
+                const isWeekend = date && (date.getUTCDay() === 0 || date.getUTCDay() === 6)
                 const isToday = date && date.toDateString() === new Date().toDateString()
                 const workingEmployees = schedule?.employees.filter(e => e.isWorking) || []
 
                 return (
                   <div
                     key={index}
-                    className={`min-h-[100px] p-2 rounded-lg border ${
-                      !date 
-                        ? 'bg-transparent border-transparent'
-                        : isToday
-                        ? 'border-2 border-primary bg-primary/5'
-                        : isWeekend
-                        ? 'bg-bg-main border-border'
-                        : 'bg-card-bg border-border'
-                    }`}
+                    className={`
+                      min-h-[80px] sm:min-h-[100px] lg:min-h-[120px]
+                      p-1.5 sm:p-2 lg:p-3
+                      rounded-lg border
+                      ${
+                        !date 
+                          ? 'bg-transparent border-transparent'
+                          : isToday
+                          ? 'border-2 border-primary bg-primary/5'
+                          : isWeekend
+                          ? 'bg-bg-main border-border'
+                          : 'bg-card-bg border-border'
+                      }
+                    `}
                   >
                     {date && (
                       <>
-                        <div className={`text-sm font-semibold mb-2 ${isToday ? 'text-primary' : 'text-text-light'}`}>
+                        <div className={`text-xs sm:text-sm font-semibold mb-1 sm:mb-2 ${isToday ? 'text-primary' : 'text-text-light'}`}>
                           {date.getDate()}
                         </div>
+                        {/* ✅ PASTILLES AVEC TOOLTIP HORAIRES */}
                         <div className="flex flex-wrap gap-1">
                           {workingEmployees.map((emp) => (
-                            <div
-                              key={emp.id}
-                              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm cursor-help"
-                              style={{ backgroundColor: emp.color }}
-                              title={emp.name}
-                            >
-                              {emp.initials}
+                            <div key={emp.id} className="group relative">
+                              <div
+                                className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-white text-[10px] sm:text-xs font-bold shadow-sm cursor-help"
+                                style={{ backgroundColor: emp.color }}
+                              >
+                                {emp.initials}
+                              </div>
+                              {/* Tooltip au survol */}
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 whitespace-nowrap pointer-events-none">
+                                <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-xl">
+                                  <div className="font-semibold">{emp.name}</div>
+                                  {emp.work_hours && (
+                                    <div className="text-gray-300 mt-1 font-mono text-[10px]">{emp.work_hours}</div>
+                                  )}
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -374,19 +368,25 @@ export default function EmployeeDashboard() {
           </div>
         </div>
 
+        {/* Indication scroll mobile */}
+        <div className="sm:hidden text-center text-xs text-gray-500 mt-3 py-2 bg-gray-50 rounded-lg">
+          👈 Glissez pour voir plus 👉
+        </div>
+
+        {/* Légende */}
         {monthSchedule.length > 0 && monthSchedule[0]?.employees && (
-          <div className="mt-6 pt-6 border-t border-border">
-            <h3 className="font-semibold mb-3 text-sm">Légende de l'équipe</h3>
-            <div className="flex flex-wrap gap-2">
+          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
+            <h3 className="font-semibold mb-3 text-xs sm:text-sm">Légende de l'équipe</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {monthSchedule[0].employees.map((emp) => (
-                <div key={emp.id} className="flex items-center gap-1.5 text-sm">
+                <div key={emp.id} className="flex items-center gap-1.5 text-xs sm:text-sm">
                   <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                     style={{ backgroundColor: emp.color }}
                   >
                     {emp.initials}
                   </div>
-                  <span>{emp.name}</span>
+                  <span className="truncate">{emp.name}</span>
                 </div>
               ))}
             </div>
@@ -394,7 +394,7 @@ export default function EmployeeDashboard() {
         )}
       </div>
 
-      {/* Modal nouvelle demande */}
+      {/* Modal nouvelle demande - ✅ RESPONSIVE */}
       <Modal
         isOpen={showLeaveModal}
         onClose={() => setShowLeaveModal(false)}
@@ -403,16 +403,16 @@ export default function EmployeeDashboard() {
       >
         <form onSubmit={handleSubmitLeave} className="space-y-4">
           {user && (
-            <div className="p-4 bg-bg-main rounded-xl text-sm grid grid-cols-2 gap-4">
+            <div className="p-3 sm:p-4 bg-bg-main rounded-xl text-xs sm:text-sm grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <strong>Congés disponibles :</strong>{' '}
-                <span className="text-lg font-bold text-success block">
+                <span className="text-base sm:text-lg font-bold text-success block">
                   {stats.available} / {user.total_leave_per_year} jours
                 </span>
               </div>
               <div>
                 <strong>Heures récup :</strong>{' '}
-                <span className="text-lg font-bold text-primary block">
+                <span className="text-base sm:text-lg font-bold text-primary block">
                   {stats.recovery_hours}h
                 </span>
               </div>
@@ -421,31 +421,31 @@ export default function EmployeeDashboard() {
 
           {/* Type de demande */}
           <div>
-            <label className="block font-semibold mb-2">Type de demande *</label>
-            <div className="grid grid-cols-2 gap-3">
+            <label className="block font-semibold mb-2 text-sm sm:text-base">Type de demande *</label>
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <button
                 type="button"
-                className={`p-4 rounded-xl border-2 transition-all ${
+                className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
                   leaveForm.request_type === 'leave_days'
                     ? 'border-primary bg-primary/10'
                     : 'border-border hover:border-primary/50'
                 }`}
                 onClick={() => setLeaveForm({ ...leaveForm, request_type: 'leave_days' })}
               >
-                <div className="text-2xl mb-2">🏖️</div>
-                <div className="font-semibold">Jours de congés</div>
+                <div className="text-xl sm:text-2xl mb-1 sm:mb-2">🏖️</div>
+                <div className="font-semibold text-xs sm:text-sm">Jours de congés</div>
               </button>
               <button
                 type="button"
-                className={`p-4 rounded-xl border-2 transition-all ${
+                className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
                   leaveForm.request_type === 'recovery_hours'
                     ? 'border-primary bg-primary/10'
                     : 'border-border hover:border-primary/50'
                 }`}
                 onClick={() => setLeaveForm({ ...leaveForm, request_type: 'recovery_hours' })}
               >
-                <div className="text-2xl mb-2">⏰</div>
-                <div className="font-semibold">Heures récupération</div>
+                <div className="text-xl sm:text-2xl mb-1 sm:mb-2">⏰</div>
+                <div className="font-semibold text-xs sm:text-sm">Heures récupération</div>
               </button>
             </div>
           </div>
@@ -454,36 +454,36 @@ export default function EmployeeDashboard() {
             <>
               {/* Période ou jour unique */}
               <div>
-                <label className="block font-semibold mb-2">Durée *</label>
-                <div className="grid grid-cols-2 gap-3">
+                <label className="block font-semibold mb-2 text-sm sm:text-base">Durée *</label>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <button
                     type="button"
-                    className={`p-3 rounded-xl border-2 transition-all ${
+                    className={`p-2 sm:p-3 rounded-xl border-2 transition-all ${
                       leaveForm.period_type === 'single_day'
                         ? 'border-primary bg-primary/10'
                         : 'border-border hover:border-primary/50'
                     }`}
                     onClick={() => setLeaveForm({ ...leaveForm, period_type: 'single_day' })}
                   >
-                    <div className="font-semibold">Un seul jour</div>
+                    <div className="font-semibold text-xs sm:text-sm">Un seul jour</div>
                   </button>
                   <button
                     type="button"
-                    className={`p-3 rounded-xl border-2 transition-all ${
+                    className={`p-2 sm:p-3 rounded-xl border-2 transition-all ${
                       leaveForm.period_type === 'period'
                         ? 'border-primary bg-primary/10'
                         : 'border-border hover:border-primary/50'
                     }`}
                     onClick={() => setLeaveForm({ ...leaveForm, period_type: 'period' })}
                   >
-                    <div className="font-semibold">Période</div>
+                    <div className="font-semibold text-xs sm:text-sm">Période</div>
                   </button>
                 </div>
               </div>
 
               {leaveForm.period_type === 'single_day' ? (
                 <div>
-                  <label className="block font-semibold mb-2">Date *</label>
+                  <label className="block font-semibold mb-2 text-sm sm:text-base">Date *</label>
                   <input
                     type="date"
                     required
@@ -493,9 +493,9 @@ export default function EmployeeDashboard() {
                   />
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-semibold mb-2">Date de début *</label>
+                    <label className="block font-semibold mb-2 text-sm sm:text-base">Date de début *</label>
                     <input
                       type="date"
                       required
@@ -505,7 +505,7 @@ export default function EmployeeDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold mb-2">Date de fin *</label>
+                    <label className="block font-semibold mb-2 text-sm sm:text-base">Date de fin *</label>
                     <input
                       type="date"
                       required
@@ -519,18 +519,18 @@ export default function EmployeeDashboard() {
               )}
 
               {calculatedDays > 0 && (
-                <div className="p-4 bg-success/10 rounded-xl border-2 border-success/20">
-                  <div className="text-lg font-bold text-success">
+                <div className="p-3 sm:p-4 bg-success/10 rounded-xl border-2 border-success/20">
+                  <div className="text-base sm:text-lg font-bold text-success">
                     {calculatedDays} jour{calculatedDays > 1 ? 's' : ''} ouvré{calculatedDays > 1 ? 's' : ''}
                   </div>
-                  <div className="text-sm text-text-light mt-1">
+                  <div className="text-xs sm:text-sm text-text-light mt-1">
                     (Calculé selon votre grille horaire)
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block font-semibold mb-2">Type de congé *</label>
+                <label className="block font-semibold mb-2 text-sm sm:text-base">Type de congé *</label>
                 <select
                   className="input"
                   value={leaveForm.type}
@@ -547,7 +547,7 @@ export default function EmployeeDashboard() {
             <>
               {/* Heures récupération */}
               <div>
-                <label className="block font-semibold mb-2">Nombre d'heures à récupérer *</label>
+                <label className="block font-semibold mb-2 text-sm sm:text-base">Nombre d'heures à récupérer *</label>
                 <input
                   type="number"
                   step="0.5"
@@ -566,7 +566,7 @@ export default function EmployeeDashboard() {
           )}
 
           <div>
-            <label className="block font-semibold mb-2">Motif (optionnel)</label>
+            <label className="block font-semibold mb-2 text-sm sm:text-base">Motif (optionnel)</label>
             <textarea
               className="input"
               rows={3}
