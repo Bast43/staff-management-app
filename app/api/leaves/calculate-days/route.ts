@@ -1,6 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
