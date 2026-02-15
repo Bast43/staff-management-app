@@ -131,9 +131,9 @@ export default function LoginPage() {
 
         <div className="mt-6 p-4 bg-bg-main rounded-xl text-sm space-y-1">
           <p className="font-semibold mb-2">🔑 Identifiants de test :</p>
-          <p><strong>Admin:</strong> admin123</p>
           <p><strong>Marie:</strong> marie.martin@magasin.fr / password123</p>
           <p><strong>Pierre:</strong> pierre.dubois@magasin.fr / password123</p>
+          <p><strong>test:</strong> test@gmail.com / test</p>
         </div>
       </div>
     </div>
