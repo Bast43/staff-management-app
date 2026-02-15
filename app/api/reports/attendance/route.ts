@@ -3,6 +3,12 @@ import { verifyToken } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
+  export const dynamic = "force-dynamic";
+  import { NextRequest, NextResponse } from 'next/server'
+  import { verifyToken } from '@/lib/auth'
+  import { supabase } from '@/lib/supabase'
+
+  export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get('auth-token')?.value
     if (!token) {
